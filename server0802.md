@@ -1,0 +1,26 @@
+## socket
+- setsockopt
+    - SOL_SOCKET
+    - KEEP_ALIVE：加快系统检查socket链接的频率，但真实知道socket断开，仍需要对socket进行recv或者send操作才行
+    - The default keepalive probes are sent every 2 hours, and the peer is determinned dead if 9 probes with 75 seconds inbetween them all fail
+    - SO_REUSE_ADDR: 当连接处于TIME_WAIT状态时，允许另一个socket绑定到同一端口
+    - TIME_WAIT：当socket被close，但其中仍有未处理的数据
+- socket.close() vs socket.shutdown()
+    - close 减少引用计数，为0后关闭socket，释放资源
+    - shutdown立即禁止socket读/写，但仍然需要close来释放资源
+- listen(list_num)
+    - pending connections max number, often 128 is the system truncated value(SOMAXCONN)
+    - ECONNREFUSED will be returned, if connections > list_num
+- bind (ip, port)
+    - 127.0.0.1 only local connections
+    - real address, only connections that is to this real address
+    - 0.0.0.0 both kind of connections above
+- connect (ip, port)
+    - default will wait for a long time, and return Errno:ETIMEOUT if timeout
+- read()/read(int n)
+    - 前者收到EOF时返回，后者收到EOF时会抛出异常
+    - 大量web服务器都使用16 * 1024，即16kb作为partial read的大小
+    - redis-rb使用1024，即1kb
+- write
+    - 将数据发送到操作系统内核中的缓冲区，内核合并小数据后统一发送
+    - 通常不需要分批发送，直接write性能最佳，在影响内存时才需要作分批
